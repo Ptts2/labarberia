@@ -127,3 +127,12 @@ public class Main {
 	}
 
 }
+
+class Barbero{
+	
+	
+}
+
+class Cliente{
+	
+}
