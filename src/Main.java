@@ -129,10 +129,84 @@ public class Main {
 }
 
 class Barbero{
+	//Atributos del Barbero
+	static Barberia barberia;
+	static ExponentialDistribution distribucionExponencial;
 	
+	public Barbero(int nBarbero) {
+		// TODO 
+	}
 	
 }
 
-class Cliente{
+class Cliente implements Runnable{
+	
+	//Atributos del cliente
+	static Barberia barberia;
+	static NormalDistribution distribucionNormal;
+	
+	public Cliente(int nCliente) {
+		// TODO 
+	}
+
+	@Override
+	public void run() {
+		// TODO
+		
+	}
+}
+
+class Barberia{
+	
+	//Atributos de la barberia
+	
+	private int sillas;
+	private static Barberia barberia; //La barberia ha de ser unica por el patron singleton
+	private Barbero[] barberos;
+	/**
+	 * Constructor privado que no permite que se cree un constructor por defecto
+	 */
+	private Barberia() {
+		this.sillas = 0;
+	}
+
+	/**
+	 * Metodo para crear y devolver una única barbería
+	 * @return la barbería
+	 */
+	public static Barberia getBarberia() {
+		
+		if(barberia == null) {
+			barberia = new Barberia();
+		}else {
+			System.out.println("Ya hay una barbería creada");
+		}
+		return barberia;
+	}
+	
+	/**
+	 * Metodo que inicializa los barberos
+	 * @param barberos los barberos de la barberia
+	 */
+	public void setBarberos(Barbero[] barberos) {
+		this.barberos = barberos;
+	}
+	
+	/**
+	 * Metodo para establecer el numero de sillas de la barberia
+	 * @param nSillas numero de sillas
+	 */
+	public void setNumeroSillas(int nSillas) {
+		this.sillas = nSillas;
+	}
+	
+	/**
+	 * Para no permitir la clonación
+	 */
+	@Override
+	public Barberia clone() {
+		System.out.println("No se puede clonar una Barberia");
+		return null;
+	}
 	
 }
