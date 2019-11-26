@@ -1,5 +1,7 @@
 package labarberia;
 
+import java.util.ArrayList;
+
 public class Barberia{
 	
 	//Atributos de la barberia
@@ -8,12 +10,14 @@ public class Barberia{
 	private int sillasLibres;
 	private static Barberia barberia; //La barberia ha de ser unica por el patron singleton
 	private Barbero[] barberos;
+	private ArrayList<Cliente> clientes;
 	/**
 	 * Constructor privado que no permite que se cree un constructor por defecto
 	 */
 	private Barberia() {
 		this.sillas = 0;
 		this.sillasLibres = 0;
+		this.clientes = new ArrayList<Cliente>();
 	}
 
 	/**
@@ -38,10 +42,10 @@ public class Barberia{
 		this.barberos = barberos;
 	}
 	
-	/**
-	 * Metodo para establecer el numero de sillas de la barberia
-	 * @param nSillas numero de sillas
-	 */
+
+	public int getSillasLibres() {
+		return this.sillasLibres;
+	}
 	public void setNumeroSillas(int nSillas) {
 		this.sillas = nSillas;
 		this.sillasLibres = nSillas; 
@@ -60,6 +64,46 @@ public class Barberia{
 		}
 	}
 	
+	public void cortarPelo(char nBarbero, double tiempo) {
+		Cliente cliente;
+		
+		synchronized(clientes) {
+			
+			while(clientes.size()==0) {
+				System.out.println("El barbero "+nBarbero+" se pone a dormir.");
+				
+				try {
+					clientes.wait();
+				}catch(InterruptedException e) {};
+			}
+		}
+		
+		cliente =  clientes.get(0);
+		clientes.remove(0);
+		System.out.println("El barbero "+nBarbero+" atiende al cliente "+cliente.getNCliente()+".");
+		try {
+			Thread.sleep((long) tiempo);
+		}catch(InterruptedException e) {};
+		System.out.println("El barbero "+nBarbero+" ha cortado el pelo al cliente "+cliente.getNCliente()+".");
+	}
+	
+	public void entrar(Cliente cliente) {
+		System.out.println("El cliente "+cliente.getNCliente()+" llega a la barbería.");
+		
+		synchronized(clientes) {
+			
+			if(clientes.size() == this.sillas) {
+				System.out.println("El cliente "+cliente.getNCliente()+" se marcha sin ser atendido.");
+				return;
+			}
+			
+			clientes.add(cliente);
+			System.out.println("El cliente "+cliente.getNCliente()+" se sienta en una silla de espera.");
+			if(clientes.size()==1) {
+				clientes.notify();
+			}
+		}
+	}
 	/*
 	 * Simula que un cliente se levanta
 	 */

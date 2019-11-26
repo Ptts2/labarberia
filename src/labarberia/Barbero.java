@@ -21,6 +21,8 @@ class Barbero extends Thread{
 	
 	@Override
 	public void run() {
-		
+		while(true) {
+			barberia.cortarPelo(this.nBarbero, distribucionExponencial.sample());
+		}
 	}
 }

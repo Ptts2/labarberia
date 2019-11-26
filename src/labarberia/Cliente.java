@@ -16,9 +16,20 @@ public class Cliente implements Runnable{
 	public void interrupt() {
 		System.out.println("El cliente "+this.nCliente+" ha sido destruido.");
 	}
+	
+	public int getNCliente() {
+		return this.nCliente;
+	}
 
 	@Override
 	public void run() {
-		System.out.println("El cliente "+this.nCliente+" llega a la barbería.");
+		try {
+			Thread.sleep((long) distribucionNormal.sample());
+		}catch(InterruptedException e) {};
+		entrarALaBarberia();
+	}
+	
+	private synchronized void entrarALaBarberia() {
+		barberia.entrar(this);
 	}
 }
