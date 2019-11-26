@@ -128,14 +128,24 @@ public class Main {
 
 }
 
-class Barbero{
+class Barbero extends Thread{
+	
+	private final String abecedario = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	//Atributos del Barbero
 	static Barberia barberia;
 	static ExponentialDistribution distribucionExponencial;
+	private char nBarbero;
 	
 	public Barbero(int nBarbero) {
-		// TODO 
+		this.nBarbero = abecedario.charAt(nBarbero-1);
+		System.out.println("El barbero "+this.nBarbero+" se ha creado.");
 	}
+	
+	@Override
+	public final void interrupt() {
+		System.out.println("El barbero "+this.nBarbero+" ha sido destruido.");
+	}
+	
 	
 }
 
@@ -144,9 +154,15 @@ class Cliente implements Runnable{
 	//Atributos del cliente
 	static Barberia barberia;
 	static NormalDistribution distribucionNormal;
+	private int nCliente;
 	
 	public Cliente(int nCliente) {
-		// TODO 
+		this.nCliente = nCliente;
+		System.out.println("El cliente "+this.nCliente+" se ha creado.");
+	}
+	
+	public void interrupt() {
+		System.out.println("El cliente "+this.nCliente+" ha sido destruido.");
 	}
 
 	@Override
