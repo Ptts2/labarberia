@@ -146,6 +146,11 @@ class Barbero extends Thread{
 		System.out.println("El barbero "+this.nBarbero+" ha sido destruido.");
 	}
 	
+	@Override
+	public void run() {
+		
+	}
+	
 	
 }
 
@@ -167,8 +172,7 @@ class Cliente implements Runnable{
 
 	@Override
 	public void run() {
-		// TODO
-		
+		System.out.println("El cliente "+this.nCliente+" llega a la barbería.");
 	}
 }
 
@@ -177,6 +181,7 @@ class Barberia{
 	//Atributos de la barberia
 	
 	private int sillas;
+	private int sillasLibres;
 	private static Barberia barberia; //La barberia ha de ser unica por el patron singleton
 	private Barbero[] barberos;
 	/**
@@ -184,6 +189,7 @@ class Barberia{
 	 */
 	private Barberia() {
 		this.sillas = 0;
+		this.sillasLibres = 0;
 	}
 
 	/**
@@ -214,8 +220,28 @@ class Barberia{
 	 */
 	public void setNumeroSillas(int nSillas) {
 		this.sillas = nSillas;
+		this.sillasLibres = nSillas; 
 	}
 	
+	/*
+	 * Simula que un cliente se sienta
+	 */
+	public synchronized int clienteSeSienta(){
+		
+		if(sillasLibres > 0) {
+			this.sillasLibres--;
+			return 0;
+		}else {
+			return -1; //No hay sillas libres
+		}
+	}
+	
+	/*
+	 * Simula que un cliente se levanta
+	 */
+	public synchronized void clienteSeLevanta() {
+		this.sillasLibres++;
+	}
 	/**
 	 * Para no permitir la clonación
 	 */
