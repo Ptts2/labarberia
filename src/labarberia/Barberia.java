@@ -1,23 +1,25 @@
 package labarberia;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Barberia{
 	
 	//Atributos de la barberia
 	
 	private int sillas;
-	private int sillasLibres;
 	private static Barberia barberia; //La barberia ha de ser unica por el patron singleton
 	private Barbero[] barberos;
-	private ArrayList<Cliente> clientes;
+	private volatile int barberosOcupados;
+	private LinkedList<Cliente> clientes;
+	private volatile boolean cerrado;
 	/**
 	 * Constructor privado que no permite que se cree un constructor por defecto
 	 */
 	private Barberia() {
+		this.cerrado = false;
 		this.sillas = 0;
-		this.sillasLibres = 0;
-		this.clientes = new ArrayList<Cliente>();
+		this.clientes = new LinkedList<Cliente>();
+		this.barberosOcupados = 0;
 	}
 
 	/**
@@ -42,74 +44,90 @@ public class Barberia{
 		this.barberos = barberos;
 	}
 	
-
-	public int getSillasLibres() {
-		return this.sillasLibres;
-	}
 	public void setNumeroSillas(int nSillas) {
 		this.sillas = nSillas;
-		this.sillasLibres = nSillas; 
-	}
-	
-	/*
-	 * Simula que un cliente se sienta
-	 */
-	public synchronized int clienteSeSienta(){
-		
-		if(sillasLibres > 0) {
-			this.sillasLibres--;
-			return 0;
-		}else {
-			return -1; //No hay sillas libres
-		}
 	}
 	
 	public void cortarPelo(char nBarbero, double tiempo) {
+		
+		if(this.cerrado == true) {
+			return;
+		}else {
+		
 		Cliente cliente;
 		
-		synchronized(clientes) {
+		synchronized(barberos) {
 			
 			while(clientes.size()==0) {
 				System.out.println("El barbero "+nBarbero+" se pone a dormir.");
-				
 				try {
-					clientes.wait();
+					barberos.wait();
 				}catch(InterruptedException e) {};
 			}
 		}
 		
-		cliente =  clientes.get(0);
-		clientes.remove(0);
+		cliente = clientes.poll();
+		
 		System.out.println("El barbero "+nBarbero+" atiende al cliente "+cliente.getNCliente()+".");
+		synchronized(barberos) {
+			this.barberosOcupados++;
+		}
+		
 		try {
+			cliente.sleep(tiempo);
 			Thread.sleep((long) tiempo);
 		}catch(InterruptedException e) {};
 		System.out.println("El barbero "+nBarbero+" ha cortado el pelo al cliente "+cliente.getNCliente()+".");
+		
+		synchronized(barberos) {
+			this.barberosOcupados--;
+		}
+		synchronized(clientes){
+			clientes.notify();
+		}
+		}
 	}
 	
 	public void entrar(Cliente cliente) {
-		System.out.println("El cliente "+cliente.getNCliente()+" llega a la barbería.");
 		
-		synchronized(clientes) {
-			
+		if(this.cerrado == true) {
+			System.out.println("El cliente "+cliente.getNCliente()+" ha sido destruido.");
+			Thread.currentThread().interrupt();
+		}else {
+		
+		
+			System.out.println("El cliente "+cliente.getNCliente()+" llega a la barbería.");
+		
 			if(clientes.size() == this.sillas) {
 				System.out.println("El cliente "+cliente.getNCliente()+" se marcha sin ser atendido.");
 				return;
 			}
-			
-			clientes.add(cliente);
-			System.out.println("El cliente "+cliente.getNCliente()+" se sienta en una silla de espera.");
-			if(clientes.size()==1) {
-				clientes.notify();
+			clientes.offer(cliente);
+		
+			synchronized(clientes) {
+				while(barberosOcupados==this.barberos.length) {
+					System.out.println("El cliente "+cliente.getNCliente()+" se sienta en una silla de espera.");
+					try{
+						clientes.wait();
+					}catch(InterruptedException e) {}
+				}		
+			}
+			synchronized(barberos){
+				barberos.notify();
 			}
 		}
 	}
-	/*
-	 * Simula que un cliente se levanta
-	 */
-	public synchronized void clienteSeLevanta() {
-		this.sillasLibres++;
+	
+	public void cerrar() {
+		this.cerrado = true;
+		synchronized(clientes) {
+			clientes.notifyAll();
+		}
+		synchronized(barberos) {
+			barberos.notifyAll();
+		}
 	}
+
 	/**
 	 * Para no permitir la clonación
 	 */

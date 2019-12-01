@@ -1,32 +1,44 @@
 package labarberia;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-public class Cliente implements Runnable{
+public class Cliente extends Thread{
 	
 	//Atributos del cliente
 	static Barberia barberia;
 	static NormalDistribution distribucionNormal;
 	private int nCliente;
 	
+	
 	public Cliente(int nCliente) {
 		this.nCliente = nCliente;
 		System.out.println("El cliente "+this.nCliente+" se ha creado.");
 	}
 	
-	public void interrupt() {
+	@Override
+	public final void interrupt() {
 		System.out.println("El cliente "+this.nCliente+" ha sido destruido.");
+		Thread.currentThread().interrupt();
 	}
 	
 	public int getNCliente() {
 		return this.nCliente;
 	}
-
-	@Override
-	public void run() {
+	
+	public void sleep(double tiempo) {
 		try {
-			Thread.sleep((long) distribucionNormal.sample());
-		}catch(InterruptedException e) {};
-		entrarALaBarberia();
+		Thread.sleep((long) tiempo);
+		}catch(InterruptedException e) {}
+	}
+
+	public void run() {
+		
+		while(!Thread.currentThread().isInterrupted()) {
+			try {
+				Thread.sleep((long)Math.abs(distribucionNormal.sample()));
+			}catch(InterruptedException e) {}; 
+			entrarALaBarberia();
+		}
+		
 	}
 	
 	private synchronized void entrarALaBarberia() {

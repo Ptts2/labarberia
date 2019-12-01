@@ -8,20 +8,23 @@ class Barbero extends Thread{
 	static Barberia barberia;
 	static ExponentialDistribution distribucionExponencial;
 	private char nBarbero;
+	private volatile boolean running;
 	
 	public Barbero(int nBarbero) {
+		
+		running = true;
 		this.nBarbero = abecedario.charAt(nBarbero-1);
 		System.out.println("El barbero "+this.nBarbero+" se ha creado.");
 	}
 	
-	@Override
 	public final void interrupt() {
+		barberia.cerrar();
+		this.running=!this.running;
 		System.out.println("El barbero "+this.nBarbero+" ha sido destruido.");
 	}
 	
-	@Override
 	public void run() {
-		while(true) {
+		while(running) {
 			barberia.cortarPelo(this.nBarbero, distribucionExponencial.sample());
 		}
 	}
